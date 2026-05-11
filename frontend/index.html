@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="CareHome Services — Professional care home drivers, cooks, care workers, and more. Compassionate support for your loved ones." />
     <meta name="keywords" content="care home, care worker, care driver, cook, elderly care, home care services UK" />
@@ -11,6 +11,30 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet" />
+    <!-- GitHub Pages SPA redirect: decode the path encoded by 404.html back into history -->
+    <script>
+      (function(){
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Also handle the ?/ style redirect from 404.html
+        var l = window.location;
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          });
+          var path = decoded[0] ? decoded[0] : '';
+          var query = decoded.slice(1).join('&');
+          history.replaceState(null, null,
+            l.pathname.slice(0, -1) + path +
+            (query ? ('?' + query) : '') +
+            l.hash
+          );
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
