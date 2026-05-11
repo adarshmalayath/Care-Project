@@ -120,17 +120,37 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {/* Notification Bell */}
           <div style={{ position: 'relative' }}>
-            <div style={{
-              width: 38, height: 38,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid #1E3A5F',
-              borderRadius: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#8BA4C0',
-              animation: pendingCount > 0 ? 'pulse-glow 2s infinite' : 'none',
-            }}>
+            <button
+              id="notification-bell-btn"
+              title={pendingCount > 0 ? `${pendingCount} pending enquiries` : 'No pending enquiries'}
+              onClick={() => {
+                setActiveFilter('PENDING')
+                setTimeout(() => {
+                  document.getElementById('enquiry-list')?.scrollIntoView({ behavior: 'smooth' })
+                }, 100)
+              }}
+              style={{
+                width: 38, height: 38,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid #1E3A5F',
+                borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: pendingCount > 0 ? '#FCD34D' : '#8BA4C0',
+                cursor: 'pointer',
+                animation: pendingCount > 0 ? 'pulse-glow 2s infinite' : 'none',
+                transition: 'background 0.2s, border-color 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                e.currentTarget.style.borderColor = '#2E5080'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                e.currentTarget.style.borderColor = '#1E3A5F'
+              }}
+            >
               <Bell size={17} />
-            </div>
+            </button>
             {pendingCount > 0 && (
               <span style={{
                 position: 'absolute', top: -5, right: -5,
@@ -139,6 +159,7 @@ export default function AdminDashboard() {
                 width: 18, height: 18, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 border: '2px solid #08111E',
+                pointerEvents: 'none',
               }}>
                 {pendingCount > 9 ? '9+' : pendingCount}
               </span>
@@ -306,7 +327,7 @@ export default function AdminDashboard() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+          <div id="enquiry-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             <AnimatePresence mode="popLayout">
               {filtered.map((enq, i) => {
                 const sc = STATUS_COLORS[enq.status] || STATUS_COLORS.PENDING
