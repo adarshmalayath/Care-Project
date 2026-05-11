@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                                 onClick={() => {
                                   setNotifOpen(false)
                                   setExpandedId(enq.enquiryId)
-                                  setActiveFilter('PENDING')
+                                  // Do NOT change the active filter — keep total count intact
                                   setTimeout(() => {
                                     document.getElementById(`enq-${enq.enquiryId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                                   }, 150)
