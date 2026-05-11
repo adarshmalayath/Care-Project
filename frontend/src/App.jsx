@@ -11,7 +11,7 @@ import AdminInsights from './pages/AdminInsights'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Toaster
           position="top-right"
           toastOptions={{
