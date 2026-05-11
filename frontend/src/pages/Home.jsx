@@ -35,27 +35,31 @@ export default function Home() {
       {/* ─── Hero ─── */}
       <section style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #08111E 0%, #0D1B2E 50%, #112240 100%)',
         display: 'flex', alignItems: 'center',
         position: 'relative', overflow: 'hidden',
         paddingTop: 80,
+        backgroundImage: `url(${import.meta.env.BASE_URL}care-worker-hero.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center right',
+        backgroundRepeat: 'no-repeat',
       }}>
-        {/* Background orbs */}
+        {/* Dark gradient overlay — fades from opaque navy on the left to semi-transparent on the right */}
         <div style={{
-          position: 'absolute', top: '15%', right: '-5%',
-          width: 500, height: 500,
-          background: 'radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)',
-          borderRadius: '50%', pointerEvents: 'none',
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(100deg, #08111E 40%, rgba(8,17,30,0.82) 65%, rgba(8,17,30,0.45) 100%)',
+          pointerEvents: 'none',
         }} />
+
+        {/* Subtle blue glow */}
         <div style={{
           position: 'absolute', bottom: '10%', left: '-10%',
           width: 400, height: 400,
-          background: 'radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)',
           borderRadius: '50%', pointerEvents: 'none',
         }} />
 
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: 680 }}>
+          <div style={{ maxWidth: 620 }}>
             <motion.h1
               initial="hidden" animate="show" variants={fadeUp} custom={1}
               className="section-title font-serif"
@@ -68,7 +72,7 @@ export default function Home() {
               initial="hidden" animate="show" variants={fadeUp} custom={2}
               style={{
                 fontSize: '1.125rem', color: '#8BA4C0', lineHeight: 1.8,
-                maxWidth: 560, marginBottom: '2.5rem',
+                maxWidth: 520, marginBottom: '2.5rem',
               }}
             >
               We provide professional, dignified care services across the UK — from
