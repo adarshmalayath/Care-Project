@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [searchQuery, setSearchQuery]   = useState('')
   const [pendingCount, setPendingCount] = useState(0)
+  const [totalCount, setTotalCount]     = useState({ total: 0, pending: 0, replied: 0, discarded: 0 })
   const [replyTarget, setReplyTarget]   = useState(null)
   const [expandedId, setExpandedId]     = useState(null)
   const [lastRefresh, setLastRefresh]   = useState(new Date())
@@ -48,9 +49,24 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async (filter) => {
     setLoading(true)
     try {
-      const res = await getEnquiries(filter === 'All' ? '' : filter)
-      setEnquiries(res.data.enquiries || [])
-      setPendingCount(res.data.pendingCount || 0)
+      // Always fetch ALL enquiries first to keep total counts accurate
+      const allRes = await getEnquiries('')
+      const allEnqs = allRes.data.enquiries || []
+      setTotalCount({
+        total:     allEnqs.length,
+        pending:   allEnqs.filter(e => e.status === 'PENDING').length,
+        replied:   allEnqs.filter(e => e.status === 'REPLIED').length,
+        discarded: allEnqs.filter(e => e.status === 'DISCARDED').length,
+      })
+      setPendingCount(allRes.data.pendingCount || 0)
+
+      // Then apply the active filter to the displayed list
+      if (filter && filter !== 'All') {
+        const filtered = await getEnquiries(filter)
+        setEnquiries(filtered.data.enquiries || [])
+      } else {
+        setEnquiries(allEnqs)
+      }
       setLastRefresh(new Date())
     } catch {
       toast.error('Failed to load enquiries.')
@@ -349,10 +365,10 @@ export default function AdminDashboard() {
           gap: '1rem', marginBottom: '2rem',
         }}>
           {[
-            { label: 'Total Enquiries', value: enquiries.length, color: '#3B82F6', icon: Inbox },
-            { label: 'Pending', value: enquiries.filter(e => e.status === 'PENDING').length, color: '#F59E0B', icon: Clock },
-            { label: 'Replied', value: enquiries.filter(e => e.status === 'REPLIED').length, color: '#10B981', icon: CheckCircle },
-            { label: 'Discarded', value: enquiries.filter(e => e.status === 'DISCARDED').length, color: '#EF4444', icon: XCircle },
+            { label: 'Total Enquiries', value: totalCount.total,     color: '#3B82F6', icon: Inbox },
+            { label: 'Pending',         value: totalCount.pending,    color: '#F59E0B', icon: Clock },
+            { label: 'Replied',         value: totalCount.replied,    color: '#10B981', icon: CheckCircle },
+            { label: 'Discarded',       value: totalCount.discarded,  color: '#EF4444', icon: XCircle },
           ].map((s, i) => (
             <motion.div
               key={i}
