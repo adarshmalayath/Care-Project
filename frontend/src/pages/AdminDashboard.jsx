@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bell, BarChart2, LogOut, Heart, RefreshCw,
   Mail, Phone, MapPin, Clock, MessageSquare,
   CheckCircle, XCircle, Inbox, ChevronDown,
-  Search, Filter,
+  Search, Filter, X,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -31,6 +31,19 @@ export default function AdminDashboard() {
   const [replyTarget, setReplyTarget]   = useState(null)
   const [expandedId, setExpandedId]     = useState(null)
   const [lastRefresh, setLastRefresh]   = useState(new Date())
+  const [notifOpen, setNotifOpen]       = useState(false)
+  const notifRef                        = useRef(null)
+
+  // Close notification popup on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const fetchData = useCallback(async (filter) => {
     setLoading(true)
@@ -118,39 +131,28 @@ export default function AdminDashboard() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {/* Notification Bell */}
-          <div style={{ position: 'relative' }}>
+          {/* Notification Bell + Popup */}
+          <div ref={notifRef} style={{ position: 'relative' }}>
             <button
               id="notification-bell-btn"
               title={pendingCount > 0 ? `${pendingCount} pending enquiries` : 'No pending enquiries'}
-              onClick={() => {
-                setActiveFilter('PENDING')
-                setTimeout(() => {
-                  document.getElementById('enquiry-list')?.scrollIntoView({ behavior: 'smooth' })
-                }, 100)
-              }}
+              onClick={() => setNotifOpen(o => !o)}
               style={{
                 width: 38, height: 38,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid #1E3A5F',
+                background: notifOpen ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${notifOpen ? 'rgba(59,130,246,0.5)' : '#1E3A5F'}`,
                 borderRadius: 10,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: pendingCount > 0 ? '#FCD34D' : '#8BA4C0',
                 cursor: 'pointer',
-                animation: pendingCount > 0 ? 'pulse-glow 2s infinite' : 'none',
-                transition: 'background 0.2s, border-color 0.2s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-                e.currentTarget.style.borderColor = '#2E5080'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-                e.currentTarget.style.borderColor = '#1E3A5F'
+                animation: pendingCount > 0 && !notifOpen ? 'pulse-glow 2s infinite' : 'none',
+                transition: 'all 0.2s',
               }}
             >
               <Bell size={17} />
             </button>
+
+            {/* Badge */}
             {pendingCount > 0 && (
               <span style={{
                 position: 'absolute', top: -5, right: -5,
@@ -164,6 +166,140 @@ export default function AdminDashboard() {
                 {pendingCount > 9 ? '9+' : pendingCount}
               </span>
             )}
+
+            {/* Dropdown popup */}
+            <AnimatePresence>
+              {notifOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                  style={{
+                    position: 'absolute', top: 48, right: 0,
+                    width: 340,
+                    background: '#0D1B2E',
+                    border: '1px solid #1E3A5F',
+                    borderRadius: 14,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.1)',
+                    zIndex: 200,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Header */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.875rem 1rem',
+                    borderBottom: '1px solid #1E3A5F',
+                    background: 'rgba(255,255,255,0.02)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Bell size={15} color="#3B82F6" />
+                      <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Notifications</span>
+                      {pendingCount > 0 && (
+                        <span style={{
+                          background: 'rgba(239,68,68,0.2)', color: '#F87171',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                          borderRadius: 20, padding: '0 6px',
+                          fontSize: '0.7rem', fontWeight: 700,
+                        }}>
+                          {pendingCount} pending
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setNotifOpen(false)}
+                      style={{
+                        background: 'none', border: 'none', color: '#4A6882',
+                        cursor: 'pointer', padding: 4, borderRadius: 6,
+                        display: 'flex', alignItems: 'center',
+                      }}
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                    {enquiries.filter(e => e.status === 'PENDING').length === 0 ? (
+                      <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#4A6882' }}>
+                        <CheckCircle size={28} style={{ marginBottom: 8, opacity: 0.5 }} />
+                        <p style={{ fontSize: '0.875rem', margin: 0 }}>All caught up!</p>
+                        <p style={{ fontSize: '0.8rem', margin: '4px 0 0', opacity: 0.7 }}>No pending enquiries</p>
+                      </div>
+                    ) : (
+                      enquiries
+                        .filter(e => e.status === 'PENDING')
+                        .map((enq, i) => (
+                          <div
+                            key={enq.enquiryId}
+                            style={{
+                              padding: '0.75rem 1rem',
+                              borderBottom: i < enquiries.filter(e => e.status === 'PENDING').length - 1 ? '1px solid rgba(30,58,95,0.5)' : 'none',
+                              display: 'flex', flexDirection: 'column', gap: '0.25rem',
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{enq.customerName}</div>
+                                <div style={{ fontSize: '0.775rem', color: '#3B82F6', marginTop: 2 }}>{enq.serviceName}</div>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setNotifOpen(false)
+                                  setExpandedId(enq.enquiryId)
+                                  setActiveFilter('PENDING')
+                                  setTimeout(() => {
+                                    document.getElementById(`enq-${enq.enquiryId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                  }, 150)
+                                }}
+                                style={{
+                                  background: 'rgba(59,130,246,0.1)',
+                                  border: '1px solid rgba(59,130,246,0.3)',
+                                  color: '#3B82F6', borderRadius: 6,
+                                  fontSize: '0.75rem', fontWeight: 600,
+                                  padding: '3px 10px', cursor: 'pointer',
+                                  whiteSpace: 'nowrap', flexShrink: 0,
+                                }}
+                              >
+                                View
+                              </button>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#4A6882' }}>
+                              {enq.email} · {new Date(enq.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  {pendingCount > 0 && (
+                    <div style={{ padding: '0.625rem 1rem', borderTop: '1px solid #1E3A5F' }}>
+                      <button
+                        onClick={() => {
+                          setNotifOpen(false)
+                          setActiveFilter('PENDING')
+                          setTimeout(() => document.getElementById('enquiry-list')?.scrollIntoView({ behavior: 'smooth' }), 100)
+                        }}
+                        style={{
+                          width: '100%', padding: '0.5rem',
+                          background: 'rgba(59,130,246,0.08)',
+                          border: '1px solid rgba(59,130,246,0.2)',
+                          borderRadius: 8, color: '#3B82F6',
+                          fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                        }}
+                      >
+                        View all {pendingCount} pending enquiries
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Insights */}
@@ -335,6 +471,7 @@ export default function AdminDashboard() {
 
                 return (
                   <motion.div
+                    id={`enq-${enq.enquiryId}`}
                     key={enq.enquiryId}
                     layout
                     initial={{ opacity: 0, y: 10 }}
