@@ -1,0 +1,60 @@
+-- ============================================
+-- Care Home Database Schema (H2 / Development)
+-- Compatible with Oracle structure
+-- ============================================
+
+-- Drop tables if they exist (for clean restart)
+DROP TABLE IF EXISTS ENQUIRIES;
+DROP TABLE IF EXISTS ADMINS;
+DROP SEQUENCE IF EXISTS SEQ_ADMIN_ID;
+DROP SEQUENCE IF EXISTS SEQ_ENQUIRY_ID;
+
+-- ============================================
+-- SEQUENCES (replaces Oracle sequences)
+-- ============================================
+CREATE SEQUENCE SEQ_ADMIN_ID START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_ENQUIRY_ID START WITH 1 INCREMENT BY 1;
+
+-- ============================================
+-- ADMINS TABLE
+-- ============================================
+CREATE TABLE ADMINS (
+    ADMIN_ID       BIGINT       NOT NULL DEFAULT NEXT VALUE FOR SEQ_ADMIN_ID,
+    USERNAME       VARCHAR(100) NOT NULL,
+    PASSWORD_HASH  VARCHAR(255) NOT NULL,
+    EMAIL          VARCHAR(150),
+    FULL_NAME      VARCHAR(200),
+    PHONE          VARCHAR(25),
+    CREATED_AT     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    IS_ACTIVE      BOOLEAN      DEFAULT TRUE,
+    CONSTRAINT PK_ADMINS PRIMARY KEY (ADMIN_ID),
+    CONSTRAINT UQ_ADMINS_USERNAME UNIQUE (USERNAME)
+);
+
+-- ============================================
+-- ENQUIRIES TABLE
+-- ============================================
+CREATE TABLE ENQUIRIES (
+    ENQUIRY_ID     BIGINT        NOT NULL DEFAULT NEXT VALUE FOR SEQ_ENQUIRY_ID,
+    CUSTOMER_NAME  VARCHAR(150)  NOT NULL,
+    EMAIL          VARCHAR(150)  NOT NULL,
+    PHONE          VARCHAR(25)   NOT NULL,
+    ADDRESS        VARCHAR(500)  NOT NULL,
+    SERVICE_NAME   VARCHAR(100)  NOT NULL,
+    MESSAGE        CLOB,
+    STATUS         VARCHAR(20)   NOT NULL DEFAULT 'PENDING',
+    ADMIN_REPLY    CLOB,
+    REPLIED_BY     BIGINT,
+    CREATED_AT     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_AT     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT PK_ENQUIRIES PRIMARY KEY (ENQUIRY_ID),
+    CONSTRAINT FK_ENQUIRIES_ADMIN FOREIGN KEY (REPLIED_BY) REFERENCES ADMINS(ADMIN_ID),
+    CONSTRAINT CHK_STATUS CHECK (STATUS IN ('PENDING', 'REPLIED', 'DISCARDED'))
+);
+
+-- ============================================
+-- INDEX for performance
+-- ============================================
+CREATE INDEX IDX_ENQUIRIES_STATUS ON ENQUIRIES(STATUS);
+CREATE INDEX IDX_ENQUIRIES_SERVICE ON ENQUIRIES(SERVICE_NAME);
+CREATE INDEX IDX_ENQUIRIES_CREATED ON ENQUIRIES(CREATED_AT);
