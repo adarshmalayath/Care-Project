@@ -142,8 +142,7 @@ export default function AdminDashboard() {
               Care<span style={{ color: '#3B82F6' }}>Home</span>
             </span>
           </Link>
-          <div style={{ height: 20, width: 1, background: '#1E3A5F' }} />
-          <span style={{ color: '#4A6882', fontSize: '0.85rem' }}>Admin Dashboard</span>
+
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
