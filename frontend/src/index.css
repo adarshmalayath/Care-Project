@@ -457,9 +457,60 @@ select.form-control option {
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 768px) {
+  /* Grids */
   .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .grid-4 { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .hide-mobile { display: none; }
-  .modal-box { padding: 1.5rem; }
+
+  /* Modal */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box {
+    padding: 1.25rem;
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+  }
+
+  /* Hero — stack image below text on mobile */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-illustration { display: none; }
+
+  /* Sections padding */
+  section { padding: 3.5rem 0 !important; }
+
+  /* Admin dashboard stat cards */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Enquiry card actions — stack vertically */
+  .enquiry-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .enquiry-actions button,
+  .enquiry-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Notification popup — full width on mobile */
+  .notif-popup {
+    right: -60px !important;
+    width: calc(100vw - 2rem) !important;
+  }
+
+  /* Typography scale down */
+  .section-title { font-size: clamp(1.6rem, 6vw, 2.5rem) !important; }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr; }
+  .admin-stats-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Buttons full-width in forms */
+  .form-submit-btn { width: 100%; justify-content: center; }
 }

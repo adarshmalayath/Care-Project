@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Heart } from 'lucide-react'
+import { Home, Layers, LayoutDashboard, LogOut, LogIn, Heart } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-const navLinks = [
-  { label: 'Home',     href: '/' },
-  { label: 'Services', href: '/services' },
-]
-
 export default function Navbar() {
-  const [scrolled, setScrolled]   = useState(false)
-  const [menuOpen, setMenuOpen]   = useState(false)
+  const [scrolled, setScrolled]     = useState(false)
+  const [tooltip, setTooltip]       = useState(null)
   const { isAuthenticated, logout } = useAuth()
   const location = useLocation()
 
@@ -21,7 +16,72 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => setMenuOpen(false), [location])
+  const isActive = (href) => location.pathname === href
+
+  const NavIcon = ({ href, icon: Icon, label, onClick }) => {
+    const active = href ? isActive(href) : false
+    const content = (
+      <div
+        style={{ position: 'relative' }}
+        onMouseEnter={() => setTooltip(label)}
+        onMouseLeave={() => setTooltip(null)}
+      >
+        {/* Tooltip */}
+        <AnimatePresence>
+          {tooltip === label && (
+            <motion.span
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.12 }}
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: '#0D1B2E',
+                border: '1px solid #1E3A5F',
+                borderRadius: 6,
+                padding: '4px 10px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                color: '#E2EAF4',
+                pointerEvents: 'none',
+                zIndex: 200,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+              }}
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+
+        {/* Icon button */}
+        <div style={{
+          width: 40, height: 40,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: 10,
+          background: active ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
+          border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : '#1E3A5F'}`,
+          color: active ? '#3B82F6' : '#8BA4C0',
+          transition: 'all 0.2s',
+          cursor: 'pointer',
+        }}>
+          <Icon size={18} />
+        </div>
+      </div>
+    )
+
+    if (onClick) {
+      return (
+        <button onClick={onClick} style={{ background: 'none', border: 'none', padding: 0 }}>
+          {content}
+        </button>
+      )
+    }
+    return <Link to={href}>{content}</Link>
+  }
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
@@ -32,100 +92,33 @@ export default function Navbar() {
           background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
           borderRadius: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
         }}>
           <Heart size={20} color="white" fill="white" />
         </div>
-        <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem', fontWeight: 700 }}>
+        <span style={{
+          fontFamily: 'Playfair Display, serif',
+          fontSize: 'clamp(1rem, 4vw, 1.25rem)',
+          fontWeight: 700,
+          whiteSpace: 'nowrap',
+        }}>
           Care<span style={{ color: '#3B82F6' }}>Home</span>
         </span>
       </Link>
 
-      {/* Desktop Links */}
-      <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        {navLinks.map(l => (
-          <Link key={l.href} to={l.href} style={{
-            padding: '0.5rem 1rem',
-            borderRadius: 8,
-            fontSize: '0.9375rem',
-            fontWeight: 500,
-            color: location.pathname === l.href ? '#3B82F6' : '#8BA4C0',
-            background: location.pathname === l.href ? 'rgba(59,130,246,0.1)' : 'transparent',
-            transition: 'all 0.2s',
-          }}>
-            {l.label}
-          </Link>
-        ))}
+      {/* Icon Nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <NavIcon href="/"         icon={Home}            label="Home" />
+        <NavIcon href="/services" icon={Layers}          label="Services" />
         {isAuthenticated ? (
           <>
-            <Link to="/admin" className="btn btn-ghost btn-sm">Dashboard</Link>
-            <button onClick={logout} className="btn btn-outline btn-sm">Logout</button>
+            <NavIcon href="/admin"  icon={LayoutDashboard} label="Dashboard" />
+            <NavIcon icon={LogOut} label="Logout" onClick={logout} />
           </>
         ) : (
-          <Link to="/admin/login" className="btn btn-primary btn-sm">Admin Login</Link>
+          <NavIcon href="/admin/login" icon={LogIn} label="Admin Login" />
         )}
       </div>
-
-      {/* Mobile hamburger */}
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ display: 'none' }}
-        id="mobile-menu-btn"
-        onClick={() => setMenuOpen(v => !v)}
-        aria-label="Toggle menu"
-      >
-        {menuOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Mobile nav - show via CSS */}
-      <style>{`
-        @media (max-width: 768px) {
-          #mobile-menu-btn { display: flex !important; }
-        }
-      `}</style>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            style={{
-              position: 'fixed',
-              top: 70,
-              left: 0, right: 0,
-              background: 'rgba(8,17,30,0.98)',
-              backdropFilter: 'blur(20px)',
-              borderBottom: '1px solid #1E3A5F',
-              padding: '1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-              zIndex: 99,
-            }}
-          >
-            {navLinks.map(l => (
-              <Link key={l.href} to={l.href} style={{
-                padding: '0.75rem 1rem',
-                borderRadius: 8,
-                fontSize: '1rem',
-                fontWeight: 500,
-                color: '#E2EAF4',
-                borderBottom: '1px solid #1E3A5F',
-              }}>
-                {l.label}
-              </Link>
-            ))}
-            {isAuthenticated ? (
-              <>
-                <Link to="/admin" className="btn btn-ghost">Dashboard</Link>
-                <button onClick={logout} className="btn btn-primary">Logout</button>
-              </>
-            ) : (
-              <Link to="/admin/login" className="btn btn-primary">Admin Login</Link>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   )
 }
