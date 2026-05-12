@@ -5,7 +5,7 @@ import {
   Bell, BarChart2, LogOut, Heart, RefreshCw,
   Mail, Phone, MapPin, Clock, MessageSquare,
   CheckCircle, XCircle, Inbox, ChevronDown,
-  Search, Filter, X,
+  Search, Filter, X, Layers,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -585,8 +585,28 @@ export default function AdminDashboard() {
                             padding: '1.25rem 1.5rem',
                             display: 'flex', flexDirection: 'column', gap: '1rem',
                           }}>
-                            {/* Address + Message */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            {/* Service + Address + Message */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', gap: '1rem' }}>
+                              {/* Service */}
+                              <div>
+                                <div style={{ fontSize: '0.75rem', color: '#4A6882', marginBottom: '0.25rem', fontWeight: 600 }}>
+                                  <Layers size={11} style={{ display: 'inline', marginRight: 3 }} />SERVICE
+                                </div>
+                                <span style={{
+                                  display: 'inline-block',
+                                  background: 'rgba(59,130,246,0.12)',
+                                  border: '1px solid rgba(59,130,246,0.3)',
+                                  borderRadius: 6,
+                                  padding: '2px 10px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                  color: '#3B82F6',
+                                  whiteSpace: 'nowrap',
+                                }}>
+                                  {enq.serviceName}
+                                </span>
+                              </div>
+                              {/* Address */}
                               <div>
                                 <div style={{ fontSize: '0.75rem', color: '#4A6882', marginBottom: '0.25rem', fontWeight: 600 }}>
                                   <MapPin size={11} style={{ display: 'inline', marginRight: 3 }} />ADDRESS
