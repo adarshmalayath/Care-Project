@@ -54,9 +54,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/admin/login").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/services").permitAll()
-                .requestMatchers("/actuator/health").permitAll(
-                    .requestMatchers("/api/health").permitAll()
-                )
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/api/health").permitAll()
                 // All other /api/admin/** requires authentication
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
